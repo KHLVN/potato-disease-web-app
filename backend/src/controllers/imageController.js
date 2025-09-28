@@ -1,63 +1,51 @@
 import Image from "../models/Image.js";
 import ClassificationResult from "../models/ClassificationResult.js";
 
-// Upload Image
-export async function uploadImage(req, res){
+// Upload & Classify Image
+export async function uploadImage(req, res) {
   try {
     if (!req.file) {
-      return res.status(400).json({ message: "No image uploaded." })
+      return res.status(400).json({ message: "No image uploaded." });
     }
+
+    // Save image in DB
     const newImage = new Image({
       filename: req.file.filename,
       path: req.file.path,
       mimetype: req.file.mimetype,
-    }); 
+    });
     const savedImage = await newImage.save();
-    res.status(201).json(savedImage);
-  } catch (err) {
-    res.status(500).json({ error: "Image upload failed" });
-  }
-};
 
-// Classify
-export async function classifyImage(req, res) {
-  try {
-    const { imageId } = req.params;
-    const image = await Image.findById(imageId);
-    if (!image) return res.status(404).json({ error: "Image not found" });
-
-    // Para sa Deep Learning MODEL dito
-    // const response = await axios.post("http://localhost:5000/predict", {
-    //   imagePath: image.path,
-    // });
-
+    // Mock classification (replace with ML model later)
     const mockResult = {
-      disease: "Healthy",  // or "Bacterial", "Healthy"
-      confidence: "92%",
-      filePath: req.file.path,
+      disease: "healthy",   // enum: healthy | fungal | bacterial
+      confidence: 0.92,     // probability_score
+      filePath: savedImage.path,
     };
-
-    res.status(200).json(mockResult);
-
-    const { disease, probability } = response.data;
 
     // Save classification result
     const result = new ClassificationResult({
-      image: image._id,
-      disease,
-      probability_score: probability,
+      image: savedImage._id,
+      disease: mockResult.disease,
+      probability_score: mockResult.confidence,
     });
-
     await result.save();
 
-    res.json({ imageId, disease, probability });
+    // Respond with classification + image reference
+    res.status(201).json({
+      imageId: savedImage._id,
+      filename: savedImage.filename,
+      disease: result.disease,
+      probability_score: result.probability_score,
+    });
   } catch (err) {
-    res.status(500).json({ error: "Classification failed" });
+    console.error("UPLOAD ERROR:", err.message, err);
+    res.status(500).json({ error: "Image upload failed" });
   }
-};
+}
 
-// Classification Result
-export async function getResults(req, res){
+// Get all classification results
+export async function getResults(req, res) {
   try {
     const results = await ClassificationResult.find()
       .populate("image")
@@ -66,4 +54,4 @@ export async function getResults(req, res){
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch results" });
   }
-};
+}

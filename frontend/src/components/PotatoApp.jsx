@@ -22,7 +22,7 @@ function PotatoApp() {
     formData.append("image", image);
 
     try {
-      const res = await fetch("/api/images/upload", {
+      const res = await fetch("http://localhost:5001/api/images/upload", {
         method: "POST",
         body: formData,
       });
@@ -66,7 +66,7 @@ function PotatoApp() {
         <div style={{ marginTop: "2rem" }}>
           <h3>Classification Result</h3>
           <p><strong>Disease:</strong> {result.disease}</p>
-          <p><strong>Confidence:</strong> {result.confidence}</p>
+          <p><strong>Classification Result:</strong> {result.probability_score}</p>
         </div>
       )}
     </div>
