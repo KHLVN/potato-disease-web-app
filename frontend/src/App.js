@@ -1,5 +1,5 @@
 import React from "react";
-import PotatoApp from "./components/PotatoApp";
+import PotatoApp from "./components/PotatoApp.jsx";
 
 function App() {
   return (

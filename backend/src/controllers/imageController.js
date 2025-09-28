@@ -4,6 +4,9 @@ import ClassificationResult from "../models/ClassificationResult.js";
 // Upload Image
 export async function uploadImage(req, res){
   try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No image uploaded." })
+    }
     const newImage = new Image({
       filename: req.file.filename,
       path: req.file.path,
@@ -27,6 +30,14 @@ export async function classifyImage(req, res) {
     // const response = await axios.post("http://localhost:5000/predict", {
     //   imagePath: image.path,
     // });
+
+    const mockResult = {
+      disease: "Healthy",  // or "Bacterial", "Healthy"
+      confidence: "92%",
+      filePath: req.file.path,
+    };
+
+    res.status(200).json(mockResult);
 
     const { disease, probability } = response.data;
 
